@@ -1,2 +1,2 @@
 # BADERvsOS
-Explore trand between Bader charges and oxidation states for binaries with AFLOW database.
+Explore trend between Bader charges and oxidation states for binaries with AFLOW database.
