@@ -2,6 +2,8 @@ import pandas as pd
 import requests  # read url
 import re  # find digits in a string
 import matplotlib.pyplot as plt
+from mendeleev import element
+
 
 def get_links(cation, anion):
     '''get_links()
@@ -44,9 +46,13 @@ def bader_for_quick(row):
     return cation_bader, anion_bader
 
 
-def oxidation_state(row, cation, anion, number_of_electron_taken):
+def oxidation_state(row, cation, anion):
     '''calculates mean oxidation state in a compound, 
     based on number of anion and cations'''
+    
+    electrons_taken_by_groupid = {15:3, 16:2, 17:1}
+    number_of_electron_taken = electrons_taken_by_groupid[element(anion).group_id] #oxidation state of anion.
+    
     # in 'compound' elements in alphabetic order
     spicies = sorted([cation, anion])
     o = 0
@@ -118,16 +124,15 @@ def plot_os_vs_bader(db):
                     db_single_valence[db_single_valence.oxidation_state==os].charge,
                     marker = dict_of_df[os]['marker'],
                     s=dict_of_df[os]['size'], alpha=0.5, c=dict_of_df[os]['color'], 
-                    label = str(os) + ' OS, '+ str(number_of_atoms) +' atoms ')
+                    label = str(os) + ' oxidation state, '+ str(number_of_atoms) +' atoms ')
 
 
 
 # specify your path where to save your data
 path = 'E:\\work\\Results_aflow\\GitHub\\'
-
-cation = 'Ti'
-anion = 'Cl'
-number_of_electron_taken = 1 #oxidation state of anion. IT CAN BE IN NUMBER OF STATES!!!!
+# and desierd anion and cations
+cation = 'Fe'
+anion = 'F'
 
 
 db = get_links(cation, anion)
@@ -135,7 +140,7 @@ db = get_links(cation, anion)
 db.to_csv(path+cation+anion+'links'+'.csv')
 #uncomment if saved and comment upper one
 db = pd.read_csv(path+cation+anion+'links'+'.csv')
-db['oxidation_state'] = db.apply(lambda row: oxidation_state(row, cation, anion, number_of_electron_taken), axis=1)
+db['oxidation_state'] = db.apply(lambda row: oxidation_state(row, cation, anion), axis=1)
 
 #    # next string gets bader charges for each compound
 db[['cation_charges', 'anion_charges']]  = db.apply(lambda row: bader_for_quick(row), axis=1).apply(pd.Series)  # bader returns tuple. "apply" makes it data series
