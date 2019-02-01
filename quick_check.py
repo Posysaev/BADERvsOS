@@ -80,8 +80,8 @@ def bader_to_list_of_floats(bader):
 
 
 def to_db_with_bader_for_each_atom(db, atom_type='cation'):
-    '''Returns Dataframe where each row corresponds to 
-    an atom with Bader charge and estimated oxidation state'''
+    '''Returns Dataframe whrere each row correspons to 
+    an atom with bader charge and estimated oxidation state'''
     rows_list = []
     for db_i in db.index:
         if atom_type == 'cation':
@@ -127,30 +127,30 @@ def plot_os_vs_bader(db):
                     label = str(os) + ' oxidation state, '+ str(number_of_atoms) +' atoms ')
 
 
-
-# specify your path where to save your data
-path = 'E:\\work\\Results_aflow\\GitHub\\'
-# and desierd anion and cations
-cation = 'Fe'
-anion = 'F'
-
-
-db = get_links(cation, anion)
-#better to save links
-db.to_csv(path+cation+anion+'links'+'.csv')
-#uncomment if saved and comment upper one
-db = pd.read_csv(path+cation+anion+'links'+'.csv')
-db['oxidation_state'] = db.apply(lambda row: oxidation_state(row, cation, anion), axis=1)
-
-#next string gets bader charges for each compound
-db[['cation_charges', 'anion_charges']]  = db.apply(lambda row: bader_for_quick(row), axis=1).apply(pd.Series)  # bader returns tuple. "apply" makes it data series
-
-db = db.dropna(subset=['cation_charges'])   
-db.to_csv(path+cation+anion+'.csv')
-
-db_for_each = to_db_with_bader_for_each_atom(db, atom_type='cation')
-
-fig, ax = plt.subplots()
-plot_os_vs_bader(db_for_each)
-plt.legend()
-plt.show()
+if __name__ == '__main__':
+    # specify your path where to save your data
+    path = 'E:\\work\\Results_aflow\\GitHub\\'
+    # and desierd anion and cations
+    cation = 'Fe'
+    anion = 'F'
+    
+    
+    db = get_links(cation, anion)
+    #better to save links
+    db.to_csv(path+cation+anion+'links'+'.csv')
+    #uncomment if saved and comment upper one
+    db = pd.read_csv(path+cation+anion+'links'+'.csv')
+    db['oxidation_state'] = db.apply(lambda row: oxidation_state(row, cation, anion), axis=1)
+    
+    #    # next string gets bader charges for each compound
+    db[['cation_charges', 'anion_charges']]  = db.apply(lambda row: bader_for_quick(row), axis=1).apply(pd.Series)  # bader returns tuple. "apply" makes it data series
+    
+    db = db.dropna(subset=['cation_charges'])   
+    db.to_csv(path+cation+anion+'.csv')
+    
+    db_for_each = to_db_with_bader_for_each_atom(db, atom_type='cation')
+    
+    fig, ax = plt.subplots()
+    plot_os_vs_bader(db_for_each)
+    plt.legend()
+    plt.show()
