@@ -105,7 +105,7 @@ def to_db_with_bader_for_each_atom(db, atom_type='cation'):
     
     return pd.DataFrame(rows_list).sort_values(by=['oxidation_state', 'ICSD'])
 
-def plot_os_vs_bader(db):
+def plot_os_vs_bader(db, cation, anion):
 
     size=200
     #dict for drawing scatter plot for each oxidation state. 9 for mixed
@@ -172,6 +172,6 @@ def plot_os_vs_bader(db):
     props = dict(boxstyle='round', facecolor='green', alpha=0.15)
     # place a text box 
     plt.text(1.02, 0.5, 'Intervals'+text, transform=ax.transAxes, fontsize=14, bbox=props)
-    
+    plt.style.use('bmh')
     plt.tight_layout()
     plt.show()
