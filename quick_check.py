@@ -1,7 +1,7 @@
 import pandas as pd
 import re  # find digits in a string
 import matplotlib.pyplot as plt
-import aflowlib
+from aflowlib import *
 
       
 if __name__ == '__main__':
@@ -39,6 +39,6 @@ if __name__ == '__main__':
     db_for_each = to_db_with_bader_for_each_atom(db, atom_type='cation')
 
     #plot
-    plot_os_vs_bader(db_for_each)
+    plot_os_vs_bader(db_for_each, cation, anion)
     
 
