@@ -126,14 +126,13 @@ def plot_os_vs_bader(db):
                     s=dict_of_df[os]['size'], alpha=0.5, c=dict_of_df[os]['color'], 
                     label = str(os) + ' oxidation state, '+ str(number_of_atoms) +' atoms ')
 
-
+        
 if __name__ == '__main__':
     # specify your path where to save your data
     path = 'E:\\work\\Results_aflow\\GitHub\\'
     # and desierd anion and cations
     cation = 'Fe'
     anion = 'F'
-    
     
     db = get_links(cation, anion)
     #better to save links
