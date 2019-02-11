@@ -11,7 +11,7 @@ def get_links(cation, anion):
     return dataframe of links to compounds in AFLOW database
     for all given available compounds'''
     # we need to download first page, to get total number of compounds
-    print('Download all links to available binaries in the AFLOW...')
+    print('Downloading all links to available binaries in the AFLOW...')
     link = "http://aflowlib.duke.edu/search/API/?species({},{}),$nspecies(2),paging(1)".format(cation, anion)
     db_links = pd.read_json(link, orient='index')
     total_number_of_compounds = db_links.index[0].split()[2]
@@ -23,7 +23,7 @@ def get_links(cation, anion):
             db_links = db_links.append(pd.read_json(link_temp, orient='index'))
     print('Done.')
     print(" ".join(['In total', total_number_of_compounds,cation,anion,'binaries']))
-    return db_links
+    return db_links.reset_index(drop=True)
 
 
 def bader_for_quick(row):
@@ -35,9 +35,10 @@ def bader_for_quick(row):
     link_to_get_charges = 'http://aflowlib.duke.edu/' + row['aurl'][18:] + '/?bader_net_charges'
     charges = requests.get(link_to_get_charges)
     
+    
     # skip compounds without computed Bader charges
     if charges.headers['Content-Length']=='0':
-        print('{:11s} ICSD: {:7s} No Bader charges for this record'.format(row['Unnamed: 0'], row['ICSD']))
+        print('{:11d} ICSD: {:7s} No Bader charges for this record'.format(row.name, row['ICSD']))
         return None
     
     for charge in charges.text.strip().split(sep=','):  # list of string of bader charges
@@ -45,7 +46,7 @@ def bader_for_quick(row):
             cation_bader.append(float(charge))
         else:
             anion_bader.append(float(charge))
-    print('{:11s} ICSD: {:7s} Bader charges are recieved'.format(row['Unnamed: 0'], row['ICSD']))
+    print('{:11d} ICSD: {:7s} Bader charges are recieved'.format(row.name, row['ICSD']))
     return cation_bader, anion_bader
 
 
@@ -107,7 +108,7 @@ def to_db_with_bader_for_each_atom(db, atom_type='cation'):
 
 def plot_os_vs_bader(db, cation, anion):
 
-    size=200
+    size=100
     #dict for drawing scatter plot for each oxidation state. 9 for mixed
     dict_of_df =  {1:{'marker':'o', 'linewidth':1, 'color':'b', 'edgecolors':'None', 'size':size*0.7},
                    2:{'marker':'+', 'linewidth':2, 'color':'r', 'edgecolors':'r', 'size':size},
@@ -121,20 +122,15 @@ def plot_os_vs_bader(db, cation, anion):
 
     db_single_valence = db[db.oxidation_state % 1 == 0]
     db_mixed_valence  = db[db.oxidation_state % 1 != 0]
-    
+    number_of_compounds = db_single_valence.ICSD.unique().shape[0]
     fig, ax = plt.subplots()
-    # plot all compunds
-    for os in db_single_valence.oxidation_state.unique():
-        os = int(os)
-        number_of_atoms = db_single_valence[db_single_valence.oxidation_state==os].shape[0]
-        plt.scatter([0]*number_of_atoms,
-                    db_single_valence[db_single_valence.oxidation_state==os].charge,
-                    marker = dict_of_df[os]['marker'],
-                    s=dict_of_df[os]['size'], alpha=0.5, c=dict_of_df[os]['color'], 
-                    label = str(os) + ' oxidation state, '+ str(number_of_atoms) +' atoms ')
-    plt.axvline(0, color='k', linewidth = 0.1, linestyle='dashed') 
+#    plt.style.use('bmh')
+#    plt.rcParams["font.family"] = "serif"
+#    plt.rcParams["font.serif"] = "Times new roman"
+#    plt.rcParams['axes.facecolor']='white'
+
     #plot each compound on x axis
-    for j,icsd in enumerate(db_single_valence.ICSD.unique()):
+    for j, icsd in enumerate(db_single_valence.ICSD.unique()):
         number_of_atoms = db_single_valence[db_single_valence.ICSD==icsd].shape[0]
         os = int(db_single_valence[db_single_valence.ICSD==icsd].oxidation_state.iloc[0])
 #        print(int(db_single_valence[db_single_valence.ICSD==icsd].oxidation_state.iloc[0]))
@@ -144,6 +140,17 @@ def plot_os_vs_bader(db, cation, anion):
                     s=dict_of_df[os]['size'], alpha=0.5, c=dict_of_df[os]['color'], 
                     label = '')
         plt.axvline(j, color='k', linewidth = 0.1, linestyle='dashed')
+        
+    # plot all compunds
+    for os in db_single_valence.oxidation_state.unique():
+        os = int(os)
+        number_of_all_atoms = db_single_valence[db_single_valence.oxidation_state==os].shape[0]
+        plt.scatter([number_of_compounds]*number_of_all_atoms,
+                    db_single_valence[db_single_valence.oxidation_state==os].charge,
+                    marker = dict_of_df[os]['marker'],
+                    s=dict_of_df[os]['size'], alpha=0.5, c=dict_of_df[os]['color'], 
+                    label = str(os) + ' oxidation state, '+ str(number_of_all_atoms) +' atoms ')
+#    plt.axvline(0, color='k', linewidth = 0.1, linestyle='dashed') 
             
     plt.xlabel('ICSD', fontsize=12, color='k')
     plt.ylabel('Bader charge ($e$)', fontsize=12)
@@ -159,9 +166,9 @@ def plot_os_vs_bader(db, cation, anion):
     y2 = y2+0.5
     plt.axis((x1, x2, y1, y2))
     plt.xticks([i for i in range(db_single_valence.ICSD.unique().shape[0]+1)], 
-                ['All']+list(db_single_valence.ICSD.unique()), rotation=80)
+                list(db_single_valence.ICSD.unique())+['All'], rotation=80)
     plt.legend(title='Legend', bbox_to_anchor=(1, 1))
-    fig.set_size_inches(9,6)
+    fig.set_size_inches(12,6)
     #plot intervals
     text=''
     for os in db_single_valence.oxidation_state.unique():
@@ -172,6 +179,6 @@ def plot_os_vs_bader(db, cation, anion):
     props = dict(boxstyle='round', facecolor='green', alpha=0.15)
     # place a text box 
     plt.text(1.02, 0.5, 'Intervals'+text, transform=ax.transAxes, fontsize=14, bbox=props)
-    plt.style.use('bmh')
+
     plt.tight_layout()
     plt.show()
