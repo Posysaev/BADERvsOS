@@ -15,6 +15,7 @@ In the end, the graph will appear.
 TODO:
 1. quick_check analyses only single valence compounds
 2. The script which analysis structures by calculating coordination numbers, cures from duplicates, make sure that each atom has anion-cation bond
+3. Calculation of oxidation states in mixed-valence compounds. 
 
 
 If you have any question, please write to posysaev.sergey@gmail.com
