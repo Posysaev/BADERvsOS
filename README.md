@@ -1,6 +1,7 @@
 # BADERvsOS
 Explore trend between Bader charges and oxidation states for binaries with AFLOW database and Python.
-File 'Full_for_SV_and_MV.csv' includes final data set used in the article ... 
+File 'Full_for_SV_and_MV.csv' includes final data set used in the article Comput. Mater. Sci., 2019, Accepted for 
+publication. Currently available on chemrxiv.org/s/c9564778b1aa7523f855 
 
 quick_check.py can be used to analyze trends between OS and Bader charges. It is very first version and it needs a lot of work to be used for a wider community.
 
