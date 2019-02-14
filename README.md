@@ -5,6 +5,8 @@ publication. Currently available on chemrxiv.org/s/c9564778b1aa7523f855
 
 quick_check.py can be used to analyze trends between OS and Bader charges. It is very first version and it needs a lot of work to be used for a wider community.
 
+aflowlib.py contains all needed functions, make sure it imported properly.
+
 Needed libraries: pandas, requests, re, matplotlib, mendeleev
 
 How to:
