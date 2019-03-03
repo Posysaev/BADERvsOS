@@ -2,8 +2,9 @@ import pandas as pd
 import requests  # read url
 import re  # find digits in a string
 import matplotlib.pyplot as plt
-import aflowlib
 from mendeleev import element
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 
 def get_links(cation, anion):
@@ -48,6 +49,53 @@ def bader_for_quick(row):
             anion_bader.append(float(charge))
     print('{:11d} ICSD: {:7s} Bader charges are recieved'.format(row.name, row['ICSD']))
     return cation_bader, anion_bader
+
+
+def split_bader(row):
+    '''split Bader charges to anion's and cation's charges'''
+    
+    cation_bader = []
+    anion_bader = []  
+    
+    charges = row.bader_net_charges  
+    
+    # !!!!!ADD HOW TO SKIP RECORDS WITHOUT BADER CHARGES skip compounds without computed Bader charges
+#    if charges.headers['Content-Length']=='0':
+#        print('{:11d} ICSD: {:7s} No Bader charges for this record'.format(row.name, row['ICSD']))
+#        return None
+    
+    for charge in charges.strip().split(sep=','):  # list of string of bader charges
+        if float(charge) > 0:
+            cation_bader.append(float(charge))
+        else:
+            anion_bader.append(float(charge))
+    print('{:11d} ICSD: {:7s} Bader charges are recieved'.format(row.name, row['ICSD']))
+    return cation_bader, anion_bader
+
+
+def get_data(db_list, link):
+    '''Get all data available for a compound. Recieves json dictionary'''
+#    print(link[18:])
+    db_list.append(pd.read_json('http://aflowlib.duke.edu/' + link[18:] + '/?format=json', orient='columns')[:1])  
+#    try:
+#        return data[data['bader_net_charges'].notnull()]
+#    except:
+#        print('All records are without bader')
+    return None
+        
+
+async def get_data_asynchronous(db_links):
+    '''Aflow can send you data only for one compound per respond. In order to speed up the process we use 
+    asynchronous programming and send up to 50 requests. Each respons is appended to db_list. Returns dataframe'''
+    db_list = []
+    with ThreadPoolExecutor(max_workers=50) as executor:    
+        loop = asyncio.get_event_loop()
+        print('Downloading all data to available binaries in the AFLOW...')
+        tasks  = [loop.run_in_executor(executor, get_data, *(db_list, link)) for link in db_links['aurl'] ]
+        for response in await asyncio.gather(*tasks):
+            pass
+        print('Done.')
+    return pd.concat(db_list, ignore_index=True)
 
 
 def oxidation_state(row, cation, anion):
