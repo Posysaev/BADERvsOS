@@ -58,12 +58,7 @@ def split_bader(row):
     anion_bader = []  
     
     charges = row.bader_net_charges  
-    
-    # !!!!!ADD HOW TO SKIP RECORDS WITHOUT BADER CHARGES skip compounds without computed Bader charges
-#    if charges.headers['Content-Length']=='0':
-#        print('{:11d} ICSD: {:7s} No Bader charges for this record'.format(row.name, row['ICSD']))
-#        return None
-    
+       
     for charge in charges.strip().split(sep=','):  # list of string of bader charges
         if float(charge) > 0:
             cation_bader.append(float(charge))
